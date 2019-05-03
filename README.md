@@ -1,3 +1,14 @@
+#### simple [echo](https://tools.ietf.org/html/rfc862) server
+
+##### Usage:
+
+ * `client [port [address [message]]]`
+   with the following standard values: `8080 127.0.0.1 standard`
+ * `server [port]`
+   with `8080` standard port
+
+***
+
 # Знакомство с сокетами
 
 Необходимо попробовать клиент-серверное взаимодействие через синхронные сокеты.
