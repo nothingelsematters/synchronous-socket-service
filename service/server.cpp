@@ -42,6 +42,7 @@ void server::echo() {
         int receivedfd = accept(sockfd, reinterpret_cast<sockaddr*>(&client), &csize);
         if (receivedfd == -1) {
             perror("Failed to accept");
+            close(receivedfd);
             continue;
         }
 
@@ -49,12 +50,15 @@ void server::echo() {
         int nread = read( receivedfd , buffer, BUFFER_SIZE);
         if (nread == -1) {
             perror("Failed to read");
+            close(receivedfd);
             continue;
         }
 
         if (send(receivedfd , buffer , nread, 0) != nread) {
             perror("Failed to send");
         }
+
+        close(receivedfd);
     }
 }
 
