@@ -16,7 +16,7 @@ public:
 private:
     const uint32_t address;
     const in_port_t port;
-    int sockfd = 0;
+    const int sockfd;
     static constexpr size_t BUFFER_SIZE = 1024;
 };
 

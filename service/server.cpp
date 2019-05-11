@@ -47,15 +47,17 @@ void server::echo() {
         }
 
         char buffer[BUFFER_SIZE] = {};
-        int nread = read( receivedfd , buffer, BUFFER_SIZE);
-        if (nread == -1) {
-            perror("Failed to read");
-            close(receivedfd);
-            continue;
-        }
+        int nread;
+        while (nread = read(receivedfd, buffer, BUFFER_SIZE)) {
+            if (nread == -1) {
+                perror("Failed to read");
+                close(receivedfd);
+                break;
+            }
 
-        if (send(receivedfd , buffer , nread, 0) != nread) {
-            perror("Failed to send");
+            if (send(receivedfd , buffer , nread, 0) != nread) {
+                perror("Failed to send");
+            }
         }
 
         close(receivedfd);

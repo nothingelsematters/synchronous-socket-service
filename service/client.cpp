@@ -10,15 +10,8 @@
 
 namespace echo_service {
 
-client::client(uint32_t address, in_port_t port) : address(address), port(port) {}
-
-client::~client() {
-    close(sockfd);
-}
-
-void client::yell(const std::string& str) {
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-
+client::client(uint32_t address, in_port_t port)
+    : address(address), port(port), sockfd(socket(AF_INET, SOCK_STREAM, 0)) {
     if (sockfd == -1) {
         throw service_exception("create socket");
     }
@@ -34,7 +27,13 @@ void client::yell(const std::string& str) {
     if (connect(sockfd, reinterpret_cast<sockaddr*>(&addr), addr_size) == -1) {
         throw service_exception("connect");
     }
+}
 
+client::~client() {
+    close(sockfd);
+}
+
+void client::yell(const std::string& str) {
     const char* cstr = str.c_str();
     size_t cstrlen = strlen(cstr);
     if (send(sockfd, cstr, cstrlen, 0) != cstrlen) {
