@@ -1,7 +1,8 @@
 #include <string>
+#include <iostream>
 #include <arpa/inet.h>
 #include "service/client.hpp"
-#include "service/service_exception.hpp"
+#include "service/service-exception.hpp"
 
 int main(int argc, char const* argv[]) {
     uint32_t address = inet_addr("127.0.0.1");
@@ -16,10 +17,10 @@ int main(int argc, char const* argv[]) {
 
     try {
         echo_service::client cn(address, port);
-        cn.yell(claim + "_1");
-        cn.yell(claim + "_2");
+        std::cout << cn.yell(claim + "_1") << '\n'
+                  << cn.yell(claim + "_2") << '\n';
     } catch (const echo_service::service_exception& e) {
-        perror(e.what());
+        std::cout << e.what() << '\n';
         return 1;
     }
     return 0;

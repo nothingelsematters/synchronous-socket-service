@@ -4,21 +4,23 @@
 #include <netinet/in.h>
 
 #include "server.hpp"
-#include "service_exception.hpp"
+#include "service-exception.hpp"
+#include "utils.hpp"
+
 
 namespace echo_service {
 
 server::server(in_port_t port) : port(port), sockfd(socket(AF_INET, SOCK_STREAM, 0)) {
-    if (sockfd == -1) {
-        throw service_exception("create socket");
-    }
+    check_throw(sockfd, "create socket");
 }
 
 server::~server() {
     close(sockfd);
 }
 
+
 void server::echo() {
+    std::cout << "starting" << '\n';
     sockaddr_in addr;
     socklen_t addr_size = sizeof(sockaddr_in);
     memset(&addr, 0, sizeof(sockaddr_in));
@@ -27,37 +29,31 @@ void server::echo() {
     addr.sin_port = port;
     addr.sin_addr.s_addr = HOME_ADDR;
 
-    if (bind(sockfd, reinterpret_cast<sockaddr*>(&addr), addr_size) == -1) {
-        throw service_exception("bind");
-    }
-
-    if (listen(sockfd, BACKLOG) == -1) {
-        throw service_exception("listen");
-    }
+    check_throw(bind(sockfd, reinterpret_cast<sockaddr*>(&addr), addr_size), "bind");
+    check_throw(listen(sockfd, BACKLOG), "listen");
 
     while (true) {
         sockaddr_in client;
         socklen_t csize;
 
         int receivedfd = accept(sockfd, reinterpret_cast<sockaddr*>(&client), &csize);
-        if (receivedfd == -1) {
-            perror("Failed to accept");
+        if (!check(receivedfd, "accept")) {
             close(receivedfd);
             continue;
         }
 
-        char buffer[BUFFER_SIZE] = {};
-        int nread;
-        while (nread = read(receivedfd, buffer, BUFFER_SIZE)) {
-            if (nread == -1) {
-                perror("Failed to read");
+        reader rdr(receivedfd);
+        while (true) {
+            auto [read_count, message] = rdr.read();
+            if (!check(read_count, "read")) {
                 close(receivedfd);
                 break;
             }
-
-            if (send(receivedfd , buffer , nread, 0) != nread) {
-                perror("Failed to send");
+            if (!read_count) {
+                break;
             }
+
+            send_message(receivedfd, message, false);
         }
 
         close(receivedfd);

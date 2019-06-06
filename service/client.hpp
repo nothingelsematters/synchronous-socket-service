@@ -3,6 +3,7 @@
 
 #include <string>
 #include <netinet/in.h>
+#include "utils.hpp"
 
 namespace echo_service {
 
@@ -11,13 +12,13 @@ public:
     explicit client(uint32_t address, in_port_t port);
     ~client();
 
-    void yell(const std::string& str);
+    std::string yell(const std::string& str);
 
 private:
     const uint32_t address;
     const in_port_t port;
     const int sockfd;
-    static constexpr size_t BUFFER_SIZE = 1024;
+    reader rdr;
 };
 
 } /* echo_service */
